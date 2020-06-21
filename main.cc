@@ -147,6 +147,14 @@ struct Acid_data Get_data(){
 };
 
 
+void Matrix_maker(double* A, struct Acid_data Sulfur_acid_data){
+
+    std::cout <<"Test"<<"\n";
+
+    return;
+}
+
+
 int main(){
 	/* Main function of project. in this function we will count parametrs
 	 * of solution from inputs data from user.
@@ -157,8 +165,9 @@ int main(){
 
     struct Acid_data Sulfur_acid_data = Get_data();
 
-
+    Matrix_maker(&(A[0][0]), Sulfur_acid_data);
     std::cout << Sulfur_acid_data.concentration[80];
+
 
 	return 0;
 }
