@@ -1,9 +1,12 @@
 #include <iostream>
 #include <fstream>
+#include <iomanip>
 
 
 
-int const Size = 100;
+int const Size = 4;
+int const Polynom_power = 3;
+
 
 
 struct Acid_data{
@@ -13,15 +16,17 @@ struct Acid_data{
 };
 
 
-void Print_Matrix(float* A){
+void Print_Matrix(double* A, double* B){
 
     int i = 0;
     int j = 0;
 
     for(i >= 0; i < Size; i++){
         for (j >= 0; j < Size; j++){
-              std::cout << "\t" << *(A + i * Size + j );
+              std::cout << "\t" << std::setprecision(3) << *(A + i * Size + j );
+              //std::cout << *(B + i);
         }
+        std::cout << "      " << *(B + i);
         j = 0;
         std::cout << "\n";
     }
@@ -33,48 +38,49 @@ void Print_Matrix(float* A){
 }
 
 
-void Matrix_string_convertation(float* A, int pos_base_string, int pos_chaning_string){
-
+void Matrix_string_convertation(double* A, double* B, int pos_base_string, int pos_chaning_string){
 
     while(true){
-        float delta;
-
-        if (*(A + Size * (pos_chaning_string - 1) + pos_base_string - 1) == 0){
+        if (*(A + (pos_chaning_string - 1)  * Size + (pos_base_string - 1)) == 0){
+            std::cout << "Warning: some diagonal elements equal to 0!" << "\n";
             break;
         } else {
-            delta = (*(A + Size * (pos_chaning_string - 1) + pos_base_string - 1))/(*(A + Size * (pos_base_string - 1) + pos_base_string - 1));
-
+            double tmp = *(A + (pos_chaning_string - 1)  * Size + (pos_base_string - 1));
             int k = 0;
-            int first_pos = pos_base_string - 1;
 
-                for (k >=first_pos; k < Size; k++){
-                    *(A + Size * (pos_chaning_string - 1) + k) = *(A + Size * (pos_chaning_string - 1) + k) - *(A + Size * (pos_base_string - 1) + k) * delta;
-                }
-            k = first_pos;
+            *(B + (pos_chaning_string - 1)) = (*(B + (pos_chaning_string - 1)))/(tmp);
+
+            for(k >= (pos_base_string - 1); k <Size; k++){
+                *(A + (pos_chaning_string - 1)  * Size + k) = (*(A + (pos_chaning_string - 1)  * Size + k))/(tmp);
+            }
+            k = 0;
         }
+        break;
     }
-
     return;
 }
 
 
-void Matrix_convertation(float* A, int i, int j){
+void Matrix_convertation(double* A, double* B){
 
+    int pos_base_string = 1;
+    int pos_change_string = 1;
 
-    int base_string = 1;
-    int changed_string = 2;
-
-    for (base_string >= 1; base_string < Size; base_string ++){
-        for (changed_string > base_string; changed_string <= Size; changed_string++){
-            Matrix_string_convertation(A, base_string, changed_string);
+    for (pos_base_string >= 1; pos_base_string <= Size; pos_base_string++){
+        for (pos_change_string >= pos_base_string; pos_change_string <=Size; pos_change_string++){
+            Matrix_string_convertation(A, B, pos_base_string, pos_change_string);
         }
-        changed_string = base_string + 2;
+        pos_change_string = pos_base_string + 1;
+        for (pos_change_string > pos_base_string; pos_change_string <= Size; pos_change_string++){
+            int k = pos_base_string - 1;
+            for (k >= pos_base_string; k < Size; k++){
+                *(A + (pos_change_string - 1)  * Size + k) = *(A + (pos_change_string - 1)  * Size + k) - *(A + (pos_base_string - 1)  * Size + k);
+            }
+            *(B + (pos_change_string - 1)) = *(B + (pos_change_string - 1)) - *(B + (pos_base_string - 1));
+            k = pos_base_string;
+        }
+        pos_change_string = pos_base_string + 1;
     }
-
-
-
-
-
 
     return;
 }
@@ -155,6 +161,28 @@ void Matrix_maker(double* A, struct Acid_data Sulfur_acid_data){
 }
 
 
+double Get_elements(double* A, double* B, int k, bool* F){
+
+    if ((k == Polynom_power) ||
+        (*(F + k))){
+        *(B + k) = *(B + k);
+    } else {
+        int n = Polynom_power;
+        int p = 0;
+        while((n > k)            &&
+            (n <= Polynom_power)){
+                *(B + k) = *(B + k) - *(A + (k) * Size + n) * Get_elements(A, B, n, F);
+                std::cout << "n = " << n << " k = " << k << " Delta = " << *(A + (k) * Size + n) * Get_elements(A, B, n, F) << " B["<< k << "] = "<<  *(B + k) << "\n";
+                n--;
+            }
+        n = Polynom_power;
+    }
+    *(F + k) = true;
+
+    return *(B + k);
+}
+
+
 int main(){
 	/* Main function of project. in this function we will count parametrs
 	 * of solution from inputs data from user.
@@ -162,11 +190,58 @@ int main(){
 	 * In output we will write param. of buffer solution*/
 
     double A[Size][Size];
+    double B[4];
 
-    struct Acid_data Sulfur_acid_data = Get_data();
+    int i = 1;
+    int j = 0;
 
-    Matrix_maker(&(A[0][0]), Sulfur_acid_data);
-    std::cout << Sulfur_acid_data.concentration[80];
+    A[0][0] = 1.;
+    A[0][1] = 2.;
+    A[0][2] = 3.;
+    A[0][3] = 4.;
+    A[1][0] = 2.;
+    A[1][1] = 3.;
+    A[1][2] = 4.;
+    A[1][3] = 1.;
+    A[2][0] = 3.;
+    A[2][1] = 4.;
+    A[2][2] = 1.;
+    A[2][3] = 2.;
+    A[3][0] = 4.;
+    A[3][1] = 1.;
+    A[3][2] = 2.;
+    A[3][3] = 3.;
+
+
+    B[0] = (1 * 20.) + (2 * 15.) + (3 * 13.) + (4 * 7.);
+    B[1] = (2 * 20.) + (3 * 15.) + (4 * 13.) + (1 * 7.);
+    B[2] = (3 * 20.) + (4 * 15.) + (1 * 13.) + (2 * 7.);
+    B[3] = (4 * 20.) + (1 * 15.) + (2 * 13.) + (3 * 7.);
+
+    bool F[Size] = {false, false, false, false};
+
+
+    //struct Acid_data Sulfur_acid_data = Get_data();
+
+    //Matrix_maker(&(A[0][0]), Sulfur_acid_data);
+    //std::cout << Sulfur_acid_data.concentration[80];
+    Matrix_convertation(&(A[0][0]), B);
+    for (i >= 0; i < 16; i++){
+        if (*(&A[0][0] + i) == -0.){
+            *(&A[0][0] + i) = 0;
+        } else {
+            continue;
+        }
+    }
+
+    Print_Matrix(&A[0][0], B);
+    double y = Get_elements(&(A[0][0]), B, 0, F);
+
+    i = 0;
+
+    for (i >= 0; i < Size; i++){
+        std::cout << "\t" << B[i];
+    }
 
 
 	return 0;
