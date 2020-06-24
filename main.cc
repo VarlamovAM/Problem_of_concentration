@@ -24,7 +24,6 @@ void Print_Matrix(double* A, double* B){
     for(i >= 0; i < Size; i++){
         for (j >= 0; j < Size; j++){
               std::cout << "\t" << std::setprecision(3) << *(A + i * Size + j );
-              //std::cout << *(B + i);
         }
         std::cout << "      " << *(B + i);
         j = 0;
@@ -88,14 +87,14 @@ void Matrix_convertation(double* A, double* B){
 
 double Power(double x, int pow){
 
-    double results = x;
-    int i = 2;
+    double results = 1;
+    int i = 1;
 
     while (i <= pow){
         results = results * x;
         i++;
     }
-    i = 2;
+    i = 1;
 
 
     return results;
@@ -127,7 +126,7 @@ struct Acid_data Get_data(){
 
     std::string line;
 
-    std::ifstream in("C:\Sulfur_acid.txt"); // окрываем файл для чтения
+    std::ifstream in("C:\Sulfur_acid.txt");
     if (in.is_open())
     {
         in >> N;
@@ -146,8 +145,7 @@ struct Acid_data Get_data(){
 
     }
 
-    in.close();     // закрываем файл
-
+    in.close();
 
     return Sulfur_acid_data;
 };
@@ -155,7 +153,22 @@ struct Acid_data Get_data(){
 
 void Matrix_maker(double* A, struct Acid_data Sulfur_acid_data){
 
-    std::cout <<"Test"<<"\n";
+
+    int i = 0;
+    int j = 0;
+
+    for (i >= 0; i < Size; i++){
+        for (j >= 0; j < Size; j++){
+            double *c = new double[90];
+            int k = 0;
+            for (k >= 0; k < 90; k++){
+                *(c + k) = Power(Sulfur_acid_data.concentration[k], i + j);
+            }
+            *(A + i * Size + j) = Summ(c, 90);
+            delete [] c;
+        }
+        j = 0;
+    }
 
     return;
 }
@@ -172,7 +185,6 @@ double Get_elements(double* A, double* B, int k, bool* F){
         while((n > k)            &&
             (n <= Polynom_power)){
                 *(B + k) = *(B + k) - *(A + (k) * Size + n) * Get_elements(A, B, n, F);
-                std::cout << "n = " << n << " k = " << k << " Delta = " << *(A + (k) * Size + n) * Get_elements(A, B, n, F) << " B["<< k << "] = "<<  *(B + k) << "\n";
                 n--;
             }
         n = Polynom_power;
@@ -190,42 +202,21 @@ int main(){
 	 * In output we will write param. of buffer solution*/
 
     double A[Size][Size];
-    double B[4];
-
-    int i = 1;
-    int j = 0;
-
-    A[0][0] = 1.;
-    A[0][1] = 2.;
-    A[0][2] = 3.;
-    A[0][3] = 4.;
-    A[1][0] = 2.;
-    A[1][1] = 3.;
-    A[1][2] = 4.;
-    A[1][3] = 1.;
-    A[2][0] = 3.;
-    A[2][1] = 4.;
-    A[2][2] = 1.;
-    A[2][3] = 2.;
-    A[3][0] = 4.;
-    A[3][1] = 1.;
-    A[3][2] = 2.;
-    A[3][3] = 3.;
+    double B[Size];
+    bool F[Size];
 
 
-    B[0] = (1 * 20.) + (2 * 15.) + (3 * 13.) + (4 * 7.);
-    B[1] = (2 * 20.) + (3 * 15.) + (4 * 13.) + (1 * 7.);
-    B[2] = (3 * 20.) + (4 * 15.) + (1 * 13.) + (2 * 7.);
-    B[3] = (4 * 20.) + (1 * 15.) + (2 * 13.) + (3 * 7.);
-
-    bool F[Size] = {false, false, false, false};
+    int i = 0;
 
 
-    //struct Acid_data Sulfur_acid_data = Get_data();
+    for (i >= 0; i < Size; i++){
+        *(F + i) = false;
+    }
 
-    //Matrix_maker(&(A[0][0]), Sulfur_acid_data);
-    //std::cout << Sulfur_acid_data.concentration[80];
-    Matrix_convertation(&(A[0][0]), B);
+
+    struct Acid_data Sulfur_acid_data = Get_data();
+
+
     for (i >= 0; i < 16; i++){
         if (*(&A[0][0] + i) == -0.){
             *(&A[0][0] + i) = 0;
@@ -233,15 +224,13 @@ int main(){
             continue;
         }
     }
-
-    Print_Matrix(&A[0][0], B);
-    double y = Get_elements(&(A[0][0]), B, 0, F);
-
     i = 0;
 
-    for (i >= 0; i < Size; i++){
-        std::cout << "\t" << B[i];
-    }
+
+    Matrix_maker(&(A[0][0]), Sulfur_acid_data);
+    //Print_Matrix(&A[0][0], B);
+    std::cout << "Final " << A[Size - 1][Size - 1] << "\n";
+
 
 
 	return 0;
