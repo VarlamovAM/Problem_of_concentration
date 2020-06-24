@@ -4,7 +4,7 @@
 
 
 
-int const Size = 7;
+int const Size = 11;
 int const Polynom_power = Size - 1;
 
 
@@ -13,6 +13,17 @@ struct Acid_data{
     double rho[100];
     double concentration[100];
 
+};
+
+
+struct Solution_data{
+    double Start_solution_V;
+    double Start_solution_C;
+    double Final_solution_V;
+    double Final_solution_C;
+    double Buffer_solution_V;
+    double Buffer_solution_C;
+    bool Incorrect_input = true;
 };
 
 
@@ -202,6 +213,27 @@ double Get_elements(double* A, double* B, int k, bool* F){
 }
 
 
+struct Solution_data Get_Solution_from_input(){
+    struct Solution_data Solution;
+
+    while (Solution.Incorrect_input){
+        std::cout << "Enter start solution Value and concentration: " << "\n";
+        std::cout << "V = ";
+        std::cin >> Solution.Start_solution_V;
+        std::cout << "\n" << "C = ";
+        std::cin >> Solution.Start_solution_C;
+        std::cout << "Enter final solution Value and concentration: " << "\n";
+        std::cout << "V = ";
+        std::cin >> Solution.Final_solution_V;
+        std::cout << "\n" << "C = ";
+        std::cin >> Solution.Final_solution_C;
+        Solution.Incorrect_input = false;
+    }
+
+    return Solution;
+};
+
+
 int main(){
 	/* Main function of project. in this function we will count parametrs
 	 * of solution from inputs data from user.
@@ -236,10 +268,8 @@ int main(){
 
 
     Matrix_maker(&(A[0][0]), B, Sulfur_acid_data);
-    //Print_Matrix(&A[0][0], B);
-
     Matrix_convertation(&A[0][0], B);
-    //Print_Matrix(&A[0][0], B);
+
 
     double y = Get_elements(&A[0][0], B, i, F);
     std::cout << "\n";
@@ -247,6 +277,7 @@ int main(){
     for (i >= 0; i < Size; i++){
         std::cout  << "\t" << "B[" << i << "] " << B[i];
     }
+
 
 
 	return 0;
