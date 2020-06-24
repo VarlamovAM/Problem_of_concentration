@@ -4,8 +4,8 @@
 
 
 
-int const Size = 4;
-int const Polynom_power = 3;
+int const Size = 7;
+int const Polynom_power = Size - 1;
 
 
 
@@ -151,7 +151,7 @@ struct Acid_data Get_data(){
 };
 
 
-void Matrix_maker(double* A, struct Acid_data Sulfur_acid_data){
+void Matrix_maker(double* A, double* B, struct Acid_data Sulfur_acid_data){
 
 
     int i = 0;
@@ -159,14 +159,21 @@ void Matrix_maker(double* A, struct Acid_data Sulfur_acid_data){
 
     for (i >= 0; i < Size; i++){
         for (j >= 0; j < Size; j++){
-            double *c = new double[90];
+            double *c = new double[80];
             int k = 0;
-            for (k >= 0; k < 90; k++){
-                *(c + k) = Power(Sulfur_acid_data.concentration[k], i + j);
+            for (k >= 0; k < 80; k++){
+                *(c + k) = Power((Sulfur_acid_data.concentration[k]/Sulfur_acid_data.rho[k]), i + j);
             }
-            *(A + i * Size + j) = Summ(c, 90);
+            *(A + i * Size + j) = Summ(c, 80);
             delete [] c;
         }
+        int k = 0;
+        double* d = new double[80];
+        for (k >= 0; k < 80; k++){
+            *(d + k) = Power((Sulfur_acid_data.concentration[k]/Sulfur_acid_data.rho[k]), i) * Sulfur_acid_data.concentration[k];
+        }
+        *(B + i) = Summ(d, 80);
+        delete [] d;
         j = 0;
     }
 
@@ -207,6 +214,7 @@ int main(){
 
 
     int i = 0;
+    int j = 0;
 
 
     for (i >= 0; i < Size; i++){
@@ -227,10 +235,18 @@ int main(){
     i = 0;
 
 
-    Matrix_maker(&(A[0][0]), Sulfur_acid_data);
+    Matrix_maker(&(A[0][0]), B, Sulfur_acid_data);
     //Print_Matrix(&A[0][0], B);
-    std::cout << "Final " << A[Size - 1][Size - 1] << "\n";
 
+    Matrix_convertation(&A[0][0], B);
+    //Print_Matrix(&A[0][0], B);
+
+    double y = Get_elements(&A[0][0], B, i, F);
+    std::cout << "\n";
+
+    for (i >= 0; i < Size; i++){
+        std::cout  << "\t" << "B[" << i << "] " << B[i];
+    }
 
 
 	return 0;
